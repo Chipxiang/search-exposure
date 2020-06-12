@@ -2,8 +2,10 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import random
-from load_data import id_content_reader
-from load_data import pos_neg_dict_reader
+
+from load_data import load
+
+
 
 def sparse_to_dense(idx, vocab_len = 10):
     index_tensor = torch.LongTensor([idx])
@@ -11,7 +13,8 @@ def sparse_to_dense(idx, vocab_len = 10):
     dense_tensor = torch.sparse.FloatTensor(index_tensor, value_tensor, torch.Size([vocab_len,])).to_dense()
     return dense_tensor
 
-def mini_batch(batch_size, positive_dict, negative_dict, query_dict, passage_dict):
+def mini_batch(batch_size):
+	positive_dict, negative_dict, query_dict, passage_dict = load()
     query_list = list(positive_dict.keys())
     qids = []
     queries = []
@@ -39,7 +42,7 @@ def train(net, EPOCH_SIZE):
 	net.train()
 	for mb_idx in range(EPOCH_SIZE):
 	    #Read in a new mini-batch of data!
-	    queries, pos, neg, labels = mini_batch(2, positive_dict, negative_dict, query_dict, passage_dict)
+	    queries, pos, neg, labels = mini_batch(2)
 	    q_embed = net(queries)
 	    pos_embed = net(pos)
 	    neg_embed = net(neg)

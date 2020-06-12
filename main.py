@@ -11,5 +11,5 @@ net = DSSM().to(DEVICE)
 
 def main(NUM_EPOCHS, EPOCH_SIZE):
     for ep_idx in range(NUM_EPOCHS):
-        train_loss = train(EPOCH_SIZE)
+        train_loss = train(net, EPOCH_SIZE)
         print(str(ep_idx) + ": " + str(train_loss))
