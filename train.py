@@ -55,5 +55,5 @@ def train(net, epoch_size, batch_size, learning_rate, device, positive_dict, neg
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
-        print(str(mb_idx) + " iteration: " + str(train_loss / (mb_idx + 1)))
+        # print(str(mb_idx) + " iteration: " + str(train_loss / (mb_idx + 1)))
     return train_loss / epoch_size
