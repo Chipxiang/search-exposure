@@ -5,17 +5,17 @@ import torch
 from datetime import datetime
 
 NUM_EPOCHS = 20
-EPOCH_SIZE = 1500
+EPOCH_SIZE = 750
 BATCH_SIZE = 1000
 LEARNING_RATE = 0.001
-MODEL_PATH = "/home/jianx/data/trained_model.model"
+MODEL_PATH = "/home/jianx/data/"
 
 
 def main(num_epochs, epoch_size, batch_size, learning_rate, model_path):
     dssm = DSSM()
     net = dssm.to(dssm.device)
     print("Loading data")
-    pos_neg_dict, query_dict, passage_dict = load()
+    pos_neg_dict, query_dict, passage_dict, top_dict, rating_dict, query_test_dict = load()
     print("Data successfully loaded.")
     print("Positive Negative Pair dict size: " + str(len(pos_neg_dict)))
     print("Num of queries: " + str(len(query_dict)))
@@ -25,8 +25,9 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path):
                            query_dict, passage_dict)
         print(str(ep_idx) + ": " + str(train_loss))
     date_time_obj = datetime.now()
-    timestamp_str = date_time_obj.strftime("%d-%b-%Y_%H:%M:%S_")
-    torch.save(net, timestamp_str + model_path)
+    timestamp_str = date_time_obj.strftime("%%b-%d-%Y_%H:%M:%S")
+    unique_path = model_path + timestamp_str + ".model"
+    torch.save(net, unique_path)
 
 
 if __name__ == '__main__':
