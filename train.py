@@ -37,7 +37,7 @@ def mini_batch(batch_size, device, pos_neg_dict, query_dict, passage_dict):
             queries.append(generate_sparse(q_seq))
             pos.append(generate_sparse(pos_seq))
             neg.append(generate_sparse(neg_seq))
-    labels = [1 for i in range(batch_size)]
+    labels = [0 for i in range(batch_size)]
     return torch.stack(queries).to(device), torch.stack(pos).to(device), torch.stack(neg).to(device), labels
 
 
@@ -45,6 +45,7 @@ def train(net, epoch_size, batch_size, learning_rate, device, pos_neg_dict, quer
           passage_dict):
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+    # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
     train_loss = 0.0
     net.train()
 

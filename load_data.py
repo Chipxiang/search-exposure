@@ -15,6 +15,11 @@ def obj_reader(path):
         return pickle.loads(handle.read())
 
 
+def obj_writer(obj, path):
+    with open(path, 'wb') as handle:
+        pickle.dump(obj, handle)
+
+
 def load():
     pos_neg_dict = obj_reader(POS_NEG_DICT_PATH)
     query_dict = obj_reader(QUERY_TRAIN_DICT_PATH)
