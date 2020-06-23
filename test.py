@@ -33,8 +33,7 @@ def test_loader(net, device, test_batch, top_dict, query_test_dict, passage_dict
                 score = torch.cosine_similarity(q_embed.unsqueeze(0), p_embed.unsqueeze(0)).item()
             q_results[pid] = score
         result_dict[qid] = q_results
-    print(qid, sum(q_results.values()), len(q_results), q_results)
-    print("Q vector: {} P vector: {}".format(q_embed, p_embed))
+    print(sorted(result_dict[qid].items(), key=lambda x: (x[1], [-1, 1][random.randrange(2)]), reverse=True))
     return result_dict
 
 

@@ -4,7 +4,7 @@ import torch.nn as nn
 NUM_HIDDEN_NODES = 64
 NUM_HIDDEN_LAYERS = 3
 DROPOUT_RATE = 0.1
-FEAT_COUNT = 50000
+FEAT_COUNT = 100000
 
 
 # Define the network

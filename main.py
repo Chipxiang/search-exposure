@@ -24,7 +24,7 @@ print("Batch size:", BATCH_SIZE)
 print("Learning rate:", LEARNING_RATE)
 print("Embedding size:", EMBED_SIZE)
 RANK = 10
-TEST_BATCH = 38
+TEST_BATCH = 43
 MODEL_PATH = "/home/jianx/data/results/"
 
 if not os.path.exists(MODEL_PATH):

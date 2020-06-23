@@ -3,7 +3,7 @@ import torch.nn as nn
 import torch.optim as optim
 import random
 
-VOCAB_LEN = 50000
+VOCAB_LEN = 100000
 
 
 def sparse_to_dense(idx, vocab_len=VOCAB_LEN):
@@ -53,6 +53,7 @@ def train(net, epoch_size, batch_size, learning_rate, device, pos_neg_dict, quer
         # Read in a new mini-batch of data!
         queries, pos, neg, labels = mini_batch(batch_size, device, pos_neg_dict, query_dict,
                                                passage_dict)
+        optimizer.zero_grad()
         q_embed = net(queries)
         pos_embed = net(pos)
         neg_embed = net(neg)
@@ -60,7 +61,6 @@ def train(net, epoch_size, batch_size, learning_rate, device, pos_neg_dict, quer
         out_neg = torch.cosine_similarity(q_embed, neg_embed).unsqueeze(0).T
         out = torch.cat((out_pos, out_neg), -1)
         loss = criterion(out, torch.tensor(labels).to(device))
-        optimizer.zero_grad()
         loss.backward()
         optimizer.step()
         train_loss += loss.item()
