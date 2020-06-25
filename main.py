@@ -43,14 +43,15 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
     arg_str = str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(embed_size)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
-    with open(output_path, mode='a') as output:
-        output_writer = csv.writer(output)
-        for ep_idx in range(num_epochs):
-            train_loss = train(net, epoch_size, batch_size, learning_rate, CURRENT_DEVICE, pos_neg_dict,
-                               query_dict, passage_dict)
-            avg_ndcg, avg_prec, avg_rr = test(net, CURRENT_DEVICE, test_batch, top_dict, query_test_dict, passage_dict, rating_dict,
-                                              rank)
-            print("Epoch:{}, loss:{}, NDCG:{}, P:{}, RR:{}".format(ep_idx, train_loss, avg_ndcg, avg_prec, avg_rr))
+    for ep_idx in range(num_epochs):
+        train_loss = train(net, epoch_size, batch_size, learning_rate, CURRENT_DEVICE, pos_neg_dict,
+                           query_dict, passage_dict)
+        avg_ndcg, avg_prec, avg_rr = test(net, CURRENT_DEVICE, test_batch, top_dict, query_test_dict, passage_dict,
+                                          rating_dict,
+                                          rank)
+        print("Epoch:{}, loss:{}, NDCG:{}, P:{}, RR:{}".format(ep_idx, train_loss, avg_ndcg, avg_prec, avg_rr))
+        with open(output_path, mode='a+') as output:
+            output_writer = csv.writer(output)
             output_writer.writerow([ep_idx, train_loss, avg_ndcg, avg_prec, avg_rr])
     torch.save(net, unique_path)
     cleanup_gpu_list(CURRENT_GPU_ID, GPU_ROOT)
