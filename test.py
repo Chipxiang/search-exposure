@@ -42,7 +42,6 @@ def get_ndcg_precision_rr(true_dict, test_dict, rank):
     original_rank = rank
     rank = min(rank, len(sorted_result))
     cumulative_gain = 0
-    ideal_dict = true_dict
     num_positive = 0
     rr = float("NaN")
     for i in range(len(sorted_result)):
@@ -60,13 +59,14 @@ def get_ndcg_precision_rr(true_dict, test_dict, rank):
         relevance = 0
         if pid in true_dict:
             relevance = true_dict[pid]
-        ideal_dict[pid] = relevance
         discounted_gain = relevance / math.log2(2 + i)
         cumulative_gain += discounted_gain
-    sorted_ideal = sorted(ideal_dict.items(), key=lambda x: x[1], reverse=True)
+    sorted_ideal = sorted(true_dict.items(), key=lambda x: x[1], reverse=True)
     ideal_gain = 0
     for i in range(rank):
-        relevance = sorted_ideal[i][1]
+        relevance = 0
+        if i < len(sorted_ideal):
+            relevance = sorted_ideal[i][1]
         discounted_gain = relevance / math.log2(2 + i)
         ideal_gain += discounted_gain
     ndcg = 0
