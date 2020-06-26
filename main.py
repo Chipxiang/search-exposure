@@ -44,7 +44,8 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
     for ep_idx in range(num_epochs):
-        train_loss = train(net, epoch_size, batch_size, learning_rate, CURRENT_DEVICE, pos_neg_dict,
+        optimizer = optim.Adam(net.parameters(), lr=learning_rate)
+        train_loss = train(net, epoch_size, batch_size, optimizer, CURRENT_DEVICE, pos_neg_dict,
                            query_dict, passage_dict)
         avg_ndcg, avg_prec, avg_rr = test(net, CURRENT_DEVICE, test_batch, top_dict, query_test_dict, passage_dict,
                                           rating_dict,

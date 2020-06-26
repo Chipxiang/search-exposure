@@ -5,7 +5,7 @@ NUM_HIDDEN_NODES = 64
 NUM_HIDDEN_LAYERS = 3
 DROPOUT_RATE = 0.1
 FEAT_COUNT = 100000
-
+SCALE = torch.tensor([10], dtype=torch.float)
 
 # Define the network
 class DSSM(torch.nn.Module):
@@ -25,7 +25,7 @@ class DSSM(torch.nn.Module):
         self.model = nn.Sequential(*layers)
 
     def forward(self, x):
-        return self.model(x)
+        return self.model(x) * SCALE
 
     def parameter_count(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
