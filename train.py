@@ -15,7 +15,7 @@ def sparse_to_dense(idx, vocab_len=VOCAB_LEN):
 
 def generate_sparse(idx, vocab_len=VOCAB_LEN):
     index_tensor = torch.LongTensor([idx])
-    value_tensor = torch.Tensor([1] * len(idx))
+    value_tensor = torch.Tensor([1/len(idx)] * len(idx))
     sparse_tensor = torch.sparse.FloatTensor(index_tensor, value_tensor, torch.Size([vocab_len, ]))
     return sparse_tensor
 

@@ -1,12 +1,12 @@
-from torch import optim
 from network import DSSM
 from train import train
 from load_data import load
 from gpu_allocator import select_device
 from gpu_allocator import cleanup_gpu_list
-import torch
-import csv
 from test import test
+import torch
+from torch import optim
+import csv
 import sys
 import os
 
