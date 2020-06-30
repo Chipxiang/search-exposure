@@ -10,7 +10,7 @@ FEAT_COUNT = 100000
 # Define the network
 class DSSM(torch.nn.Module):
 
-    def __init__(self, embed_size, device):
+    def __init__(self, embed_size):
         super(DSSM, self).__init__()
 
         layers = []
@@ -23,9 +23,9 @@ class DSSM(torch.nn.Module):
             last_dim = NUM_HIDDEN_NODES
         layers.append(nn.Linear(last_dim, embed_size))
         self.model = nn.Sequential(*layers)
-        self.scale = torch.tensor([10], dtype=torch.float).to(device)
+
     def forward(self, x):
-        return self.model(x) * self.scale
+        return self.model(x)
 
     def parameter_count(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)

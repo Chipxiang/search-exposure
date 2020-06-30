@@ -42,7 +42,7 @@ def mini_batch(batch_size, device, pos_neg_dict, query_dict, passage_dict):
 
 
 def train(net, epoch_size, batch_size, optimizer, device, pos_neg_dict, query_dict,
-          passage_dict):
+          passage_dict, scale):
     criterion = nn.CrossEntropyLoss()
     train_loss = 0.0
     net.train()
@@ -56,7 +56,7 @@ def train(net, epoch_size, batch_size, optimizer, device, pos_neg_dict, query_di
         neg_embed = net(neg)
         out_pos = torch.cosine_similarity(q_embed, pos_embed).unsqueeze(0).T
         out_neg = torch.cosine_similarity(q_embed, neg_embed).unsqueeze(0).T
-        out = torch.cat((out_pos, out_neg), -1)
+        out = torch.cat((out_pos, out_neg), -1) * torch.tensor([scale], dtype=torch.float).to(device)
         loss = criterion(out, torch.tensor(labels).to(device))
         loss.backward()
         optimizer.step()

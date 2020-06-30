@@ -15,6 +15,7 @@ EPOCH_SIZE = int(sys.argv[2])
 BATCH_SIZE = int(sys.argv[3])
 LEARNING_RATE = float(sys.argv[4])
 EMBED_SIZE = int(sys.argv[5])
+SCALE = int(sys.argv[6])
 GPU_ROOT = "/home/jianx/data/gpu_usage.list"
 
 CURRENT_GPU_ID, CURRENT_DEVICE = select_device(GPU_ROOT)
@@ -24,6 +25,7 @@ print("Epoch size:", EPOCH_SIZE)
 print("Batch size:", BATCH_SIZE)
 print("Learning rate:", LEARNING_RATE)
 print("Embedding size:", EMBED_SIZE)
+print("Scale size:", SCALE)
 RANK = 10
 TEST_BATCH = 43
 MODEL_PATH = "/home/jianx/data/results/"
@@ -32,8 +34,8 @@ if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
 
 
-def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, test_batch, embed_size):
-    net = DSSM(embed_size=embed_size, device=CURRENT_DEVICE).to(CURRENT_DEVICE)
+def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, test_batch, embed_size, scale):
+    net = DSSM(embed_size=embed_size).to(CURRENT_DEVICE)
     print("Loading data")
     pos_neg_dict, query_dict, passage_dict, top_dict, rating_dict, query_test_dict = load()
     print("Data successfully loaded.")
@@ -48,7 +50,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
     for ep_idx in range(num_epochs):
         optimizer = optim.Adam(net.parameters(), lr=learning_rate)
         train_loss = train(net, epoch_size, batch_size, optimizer, CURRENT_DEVICE, pos_neg_dict,
-                           query_dict, passage_dict)
+                           query_dict, passage_dict, scale)
         avg_ndcg, avg_prec, avg_rr = test(net, CURRENT_DEVICE, test_batch, top_dict, query_test_dict, passage_dict,
                                           rating_dict, rank)
         print("Epoch:{}, loss:{}, NDCG:{}, P:{}, RR:{}".format(ep_idx, train_loss, avg_ndcg, avg_prec, avg_rr))
@@ -60,4 +62,4 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
 
 
 if __name__ == '__main__':
-    main(NUM_EPOCHS, EPOCH_SIZE, BATCH_SIZE, LEARNING_RATE, MODEL_PATH, RANK, TEST_BATCH, EMBED_SIZE)
+    main(NUM_EPOCHS, EPOCH_SIZE, BATCH_SIZE, LEARNING_RATE, MODEL_PATH, RANK, TEST_BATCH, EMBED_SIZE, SCALE)
