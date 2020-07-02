@@ -44,7 +44,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
     print("Num of passages: " + str(len(passage_dict)))
 
     arg_str = str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
-        embed_size)
+        embed_size) + "_" + str(scale)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
     for ep_idx in range(num_epochs):
@@ -57,7 +57,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, rank, te
         with open(output_path, mode='a+') as output:
             output_writer = csv.writer(output)
             output_writer.writerow([ep_idx, train_loss, avg_ndcg, avg_prec, avg_rr])
-        torch.save(net, unique_path)
+        torch.save(net.state_dict(), unique_path)
     cleanup_gpu_list(CURRENT_GPU_ID, GPU_ROOT)
 
 
