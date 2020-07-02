@@ -12,12 +12,12 @@ QUERY_TEST_DICT_PATH = "/home/jianx/data/queries_test.dict"
 
 def obj_reader(path):
     with open(path, 'rb') as handle:
-        return pickle.loads(handle.read())
+        return pickle.load(handle, encoding="bytes")
 
 
 def obj_writer(obj, path):
     with open(path, 'wb') as handle:
-        pickle.dump(obj, handle)
+        pickle.dump(obj, handle, protocol=4)
 
 
 def load():
