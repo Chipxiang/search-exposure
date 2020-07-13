@@ -17,7 +17,7 @@ def obj_reader(path):
 
 def obj_writer(obj, path):
     with open(path, 'wb') as handle:
-        pickle.dump(obj, handle, protocol=4)
+        pickle.dump(obj, handle, protocol=pickle.HIGHEST_PROTOCOL)
 
 
 def load():
