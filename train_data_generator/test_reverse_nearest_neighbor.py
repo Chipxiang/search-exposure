@@ -5,10 +5,16 @@ from train import generate_sparse
 from load_data import obj_reader
 import network
 from annoy import AnnoyIndex
-
 PASSAGE_INDEX = AnnoyIndex(EMBED_SIZE, 'euclidean')
 PASSAGE_INDEX.load("/home/jianx/data/annoy/100_passage_index.ann")
 PID_MAPPING = obj_reader("/home/jianx/data/annoy/100_pid_map.dict")
+
+# (Assume annoy is working)
+# Test on 1000 random documents
+# Start with a document D, find nearest N queries from a query (train) annoy index.
+# For each query from N, get nearest 1000 documents.(Annoy) (Ground Truth)
+# Calculate average ranking of document D in these queries. (Plot)
+# Count how many of the queries in N ranks D in top 10
 
 
 qids = []
@@ -24,9 +30,9 @@ result_dict = {}
 for i, qid in enumerate(qids):
     top_list = PASSAGE_INDEX.get_nns_by_vector(NET(generate_sparse(QUERY_TEST_DICT[qid]).to(DEVICE)).detach(),1000)
     print(top_list)
-    for j, pid in enumerate(top_list):
-        if pid in PID_MAPPING:
-            top_list[j] = PID_MAPPING[pid]
+    for j, index in enumerate(top_list):
+        if index in PID_MAPPING:
+            top_list[j] = PID_MAPPING[index]
         else:
             print("Not captured in mapping")
             top_list[j] = -1
