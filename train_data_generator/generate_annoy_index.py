@@ -5,8 +5,7 @@ import torch
 from annoy import AnnoyIndex
 import forward_ranker.load_data as load_data
 import forward_ranker.train as train
-import datetime
-from datetime import datetime, timezone, timedelta
+from forward_ranker.utils import print_message
 
 generate_sparse = train.generate_sparse
 obj_reader = load_data.obj_reader
@@ -16,12 +15,6 @@ MODEL_PATH = "/home/jianx/data/results/100_1000_1000_0.001_256_10.model"
 DEVICE = torch.device("cuda")
 EMBED_SIZE = 256
 TREE_SIZE = 128
-
-TIME_OFFSET = -4
-
-
-def print_message(s, offset=TIME_OFFSET):
-    print("[{}] {}".format(datetime.now(timezone(timedelta(hours=offset))).strftime("%b %d, %H:%M:%S"), s), flush=True)
 
 
 def generate_annoy_index(embed_size, embeddings):
