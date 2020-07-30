@@ -1,5 +1,4 @@
 import sys
-
 sys.path.insert(0, '/home/jianx/search-exposure/forward_ranker/')
 import random
 import torch
@@ -10,7 +9,7 @@ from annoy import AnnoyIndex
 from utils import print_message
 
 EMBED_SIZE = 256
-NUM_OF_DOCUMENTS = 20000
+NUM_OF_DOCUMENTS = 200_000
 NUM_OF_NEAREST_QUERIES = 100
 TOP_K_RANKING = 100
 TRAINING_DATA_PATH = "/home/jianx/data/train_data/{}_{}_{}_{}_training.csv".format(EMBED_SIZE, NUM_OF_DOCUMENTS,

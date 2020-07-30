@@ -11,11 +11,6 @@ generate_sparse = train.generate_sparse
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 
-MODEL_PATH = "/home/jianx/data/results/100_1000_1000_0.001_256_10.model"
-DEVICE = torch.device("cuda")
-EMBED_SIZE = 256
-TREE_SIZE = 128
-
 
 def generate_annoy_index(embed_size, embeddings):
     mapping = {}
