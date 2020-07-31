@@ -15,7 +15,7 @@ def sparse_to_dense(idx, vocab_len=VOCAB_LEN):
 
 def generate_sparse(idx, vocab_len=VOCAB_LEN):
     index_tensor = torch.LongTensor([idx])
-    value_tensor = torch.Tensor([1] * len(idx))
+    value_tensor = torch.Tensor([1/len(idx)] * len(idx))
     sparse_tensor = torch.sparse.FloatTensor(index_tensor, value_tensor, torch.Size([vocab_len, ]))
     return sparse_tensor
 
@@ -41,14 +41,11 @@ def mini_batch(batch_size, device, pos_neg_dict, query_dict, passage_dict):
     return torch.stack(queries).to(device), torch.stack(pos).to(device), torch.stack(neg).to(device), labels
 
 
-def train(net, epoch_size, batch_size, learning_rate, device, pos_neg_dict, query_dict,
-          passage_dict):
+def train(net, epoch_size, batch_size, optimizer, device, pos_neg_dict, query_dict,
+          passage_dict, scale):
     criterion = nn.CrossEntropyLoss()
-    optimizer = optim.Adam(net.parameters(), lr=learning_rate)
-    # optimizer = optim.SGD(net.parameters(), lr=learning_rate)
     train_loss = 0.0
     net.train()
-
     for mb_idx in range(epoch_size):
         # Read in a new mini-batch of data!
         queries, pos, neg, labels = mini_batch(batch_size, device, pos_neg_dict, query_dict,
@@ -59,7 +56,7 @@ def train(net, epoch_size, batch_size, learning_rate, device, pos_neg_dict, quer
         neg_embed = net(neg)
         out_pos = torch.cosine_similarity(q_embed, pos_embed).unsqueeze(0).T
         out_neg = torch.cosine_similarity(q_embed, neg_embed).unsqueeze(0).T
-        out = torch.cat((out_pos, out_neg), -1)
+        out = torch.cat((out_pos, out_neg), -1) * torch.tensor([scale], dtype=torch.float).to(device)
         loss = criterion(out, torch.tensor(labels).to(device))
         loss.backward()
         optimizer.step()

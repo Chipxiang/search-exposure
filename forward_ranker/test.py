@@ -39,9 +39,9 @@ def test_loader(net, device, test_batch, top_dict, query_test_dict, passage_dict
 
 def get_ndcg_precision_rr(true_dict, test_dict, rank):
     sorted_result = sorted(test_dict.items(), key=lambda x: (x[1], [-1,1][random.randrange(2)]), reverse=True)
+    original_rank = rank
     rank = min(rank, len(sorted_result))
     cumulative_gain = 0
-    ideal_dict = {}
     num_positive = 0
     rr = float("NaN")
     for i in range(len(sorted_result)):
@@ -59,19 +59,20 @@ def get_ndcg_precision_rr(true_dict, test_dict, rank):
         relevance = 0
         if pid in true_dict:
             relevance = true_dict[pid]
-        ideal_dict[pid] = relevance
-        discounted_gain = (2 ** relevance - 1) / math.log2(2 + i)
+        discounted_gain = relevance / math.log2(2 + i)
         cumulative_gain += discounted_gain
-    sorted_ideal = sorted(ideal_dict.items(), key=lambda x: x[1], reverse=True)
+    sorted_ideal = sorted(true_dict.items(), key=lambda x: x[1], reverse=True)
     ideal_gain = 0
     for i in range(rank):
-        relevance = sorted_ideal[i][1]
-        discounted_gain = (2 ** relevance - 1) / math.log2(2 + i)
+        relevance = 0
+        if i < len(sorted_ideal):
+            relevance = sorted_ideal[i][1]
+        discounted_gain = relevance / math.log2(2 + i)
         ideal_gain += discounted_gain
-    ndcg = float("NaN")
+    ndcg = 0
     if ideal_gain != 0:
-        ndcg = cumulative_gain / ideal_gain
-    return ndcg, num_positive / rank, rr
+         ndcg = cumulative_gain / ideal_gain
+    return ndcg, num_positive / original_rank, rr
 
 
 def test(net, device, test_batch, top_dict, query_test_dict, passage_dict, rating_dict, rank):
