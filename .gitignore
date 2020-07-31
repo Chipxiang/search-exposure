@@ -1,3 +1,7 @@
 *.model
 *.csv
 *.txt
+*.pt
+*.dict
+*.ann
+.ipynb_checkpoints
