@@ -16,24 +16,17 @@ EMBEDDING_PATH = sys.argv[1]
 RAW_PATH = sys.argv[2]
 OUT_DIR = sys.argv[3]
 TREE_SIZE = int(sys.argv[4])
+TYPE = sys.argv[5]
 
 
 def generate_annoy_index(embed_size, embeddings, raw_data_path):
-    embedding_dict = {}
-    with open(raw_data_path, "r") as f:
-        rc = 0
-        for line in f:
-            embedding_dict[int(line.split("\t")[0])] = embeddings[rc]
-            rc += 1
-    mapping = {}
-    i = 0
+    offset_mapping = obj_reader(raw_data_path)
+    mapping = {v: k for k, v in offset_mapping.items()}
     index = AnnoyIndex(embed_size, 'dot')
-    for key, value in embedding_dict.items():
+    for i, value in enumerate(embeddings):
         index.add_item(i, value)
-        mapping[i] = key
-        i += 1
         if i % 1_000_000 == 0:
-            print_message("Progress: " + str(i) + "/" + str(len(embedding_dict)) + " " + str(i / len(embeddings)))
+            print_message("Progress: " + str(i) + "/" + str(len(embeddings)) + " " + str(i / len(embeddings)))
     return index, mapping
 
 
@@ -43,12 +36,12 @@ print(passage_embeddings.shape)
 passage_index, passage_mapping = generate_annoy_index(768, passage_embeddings,
                                                       RAW_PATH)
 del passage_embeddings
-obj_writer(passage_mapping, OUT_DIR + str(TREE_SIZE) + "_ance_passage_map.dict")
+obj_writer(passage_mapping, OUT_DIR + str(TREE_SIZE) + "_ance_" + TYPE + "_map.dict")
 del passage_mapping
 
 print_message("Start Building.")
 passage_index.build(TREE_SIZE)
 print_message("Finished Building.")
 
-passage_index.save(OUT_DIR + str(TREE_SIZE) + "_ance_passage_index.ann")
+passage_index.save(OUT_DIR + str(TREE_SIZE) + "_" + TYPE + "_ance_index.ann")
 print_message("Successfully Saved.")
