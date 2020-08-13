@@ -1,59 +1,56 @@
 import sys
-sys.path.insert(0, '/home/jianx/search-exposure/forward_ranker/')
-import random
-import torch
-from train import generate_sparse
-from load_data import obj_reader, obj_writer
-import network
-import faiss
-from utils import print_message
 
-EMBED_SIZE = 256
-NUM_OF_DOCUMENTS = 200_000
-NUM_OF_NEAREST_QUERIES = 100
-TOP_K_RANKING = 100
-TRAINING_DATA_PATH = "/home/jianx/data/train_data/{}_{}_{}_{}_training.csv".format(EMBED_SIZE, NUM_OF_DOCUMENTS,
-                                                                                   NUM_OF_NEAREST_QUERIES,
-                                                                                   TOP_K_RANKING)
+sys.path.insert(0, '/home/jianx/search-exposure/')
+import faiss
+import numpy as np
+import forward_ranker.load_data as load_data
+from forward_ranker.utils import print_message
+
+obj_reader = load_data.obj_reader
+obj_writer = load_data.obj_writer
+
+SAMPLE_SIZE = 1000
+RANK = 100
+TRAINING_DATA_PATH = "/datadrive/jianx/data/train_data/ance_training_rank{}_{}.csv".format(RANK, SAMPLE_SIZE)
+
+print_message("Loading embeddings.")
+passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
+query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
+query_train_mapping = obj_reader("/datadrive/jianx/data/annoy/100_ance_query_train_map.dict")
+pid_mapping = obj_reader("/datadrive/jianx/data/annoy/100_ance_passage_map.dict")
+pid_offset = obj_reader("/datadrive/data/preprocessed_data_with_test/pid2offset.pickle")
+
+print_message("Building index")
+faiss.omp_set_num_threads(16)
+dim = passage_embeddings.shape[1]
+passage_index = faiss.IndexFlatIP(dim)
+passage_index.add(passage_embeddings)
+query_index = faiss.IndexFlatIP(dim)
+query_index.add(query_train_embeddings)
+
+print_message("Searching all passages")
+_, queries_idx = query_index.search(passage_embeddings[:SAMPLE_SIZE], RANK)
+
 with open(TRAINING_DATA_PATH, "w+") as f:
     f.write("")
 
-MODEL_PATH = "/home/jianx/data/results/100_1000_1000_0.001_256_10.model"
-DEVICE = torch.device("cuda")
-NET = network.DSSM(embed_size=EMBED_SIZE)
-NET.load_state_dict(torch.load(MODEL_PATH))
-NET.to(DEVICE)
-NET.eval()
+avg_match = 0
+for passage_idx, indices in enumerate(queries_idx):
+    nearest_q_embs = []
+    for idx in indices:
+        nearest_q_embs.append(query_train_embeddings[idx])
+    nearest_q_embs_array = np.array(nearest_q_embs)
+    _, passages = passage_index.search(nearest_q_embs_array, RANK)
+    match_idx = np.where(passages == passage_idx)
+    avg_match += len(match_idx[0])
+    with open(TRAINING_DATA_PATH, "a") as f:
+        for i, query_results in enumerate(passages):
+            match = np.where(query_results == passage_idx)
+            rank = 0
+            if len(match[0]) != 0:
+                rank = match[0][0] + 1
+            f.write("{},{},{}\n".format(pid_mapping[passage_idx], query_train_mapping[i], rank))
+    print_message("Processed passage No. {}/{}, Avg match: {}".format(passage_idx + 1, SAMPLE_SIZE,
+                                                                      avg_match / (passage_idx + 1)))
 
-print_message("Loading annoy indices.")
-passage_index = AnnoyIndex(EMBED_SIZE, 'euclidean')
-passage_index.load("/home/jianx/data/annoy/128_passage_index.ann")
-pid_mapping = obj_reader("/home/jianx/data/annoy/128_pid_map.dict")
-
-query_index = AnnoyIndex(EMBED_SIZE, 'euclidean')
-query_index.load("/home/jianx/data/annoy/128_query_index.ann")
-qid_mapping = obj_reader("/home/jianx/data/annoy/128_qid_map.dict")
-
-print_message("Loading passage embeddings.")
-passage_embeddings = obj_reader("/home/jianx/data/results/passage_embeddings.dict")
-print_message("Sampling " + str(NUM_OF_DOCUMENTS) + " documents.")
-passage_embeddings = dict(random.sample(list(passage_embeddings.items()), NUM_OF_DOCUMENTS))
-print_message("Loading query dictionary.")
-query_train_dict = obj_reader("/home/jianx/data/queries_train.dict")
-
-counter = 0
-for pid, embedding in passage_embeddings.items():
-    if counter % 500 == 0:
-        print_message("Processing passage No. " + str(counter + 1) + "/" + str(NUM_OF_DOCUMENTS))
-    nearest_queries = query_index.get_nns_by_vector(embedding, NUM_OF_NEAREST_QUERIES)
-
-    for i, annoy_qid in enumerate(nearest_queries):
-        qid = qid_mapping[annoy_qid]
-        top_list = passage_index.get_nns_by_vector(NET(generate_sparse(query_train_dict[qid]).to(DEVICE)).detach(),
-                                                   TOP_K_RANKING)
-        for j, annoy_pid in enumerate(top_list):
-            if pid_mapping[annoy_pid] == pid:
-                with open(TRAINING_DATA_PATH, "a") as f:
-                    f.write("{},{},{}\n".format(pid, qid, j + 1))
-                break
-    counter += 1
+print_message("Average number of exposure quereis found: {}".format(avg_match / SAMPLE_SIZE))
