@@ -132,7 +132,7 @@ TOP_K = 100
 
 # With probability alpha
 # Select a random negative sample from train_neg_dict
-ALPHA = 0.6
+ALPHA = 0.4
 
 def dot_product(A, B, normalize=False):
     if normalize:
@@ -251,7 +251,7 @@ import sys
 import os
 
 
-MODEL_PATH = "./results/"
+MODEL_PATH = "/datadrive/ruohan/results/"
 CURRENT_DEVICE = "cuda:0"
 
 if not os.path.exists(MODEL_PATH):
@@ -273,7 +273,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 #     print("Num of passages: " + str(len(passage_dict)))
 #     print("Finish loading.")
 
-    arg_str = "reverse_alpha0.6" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
+    arg_str = "reverse_alpha0.4" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
         embed_size)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
@@ -292,5 +292,5 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 
 
 # Train on new training set
-main(2000,100,1000,0.0001,MODEL_PATH,32)
+main(1000,100,1000,0.0001,MODEL_PATH,32)
 
