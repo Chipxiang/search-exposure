@@ -22,8 +22,8 @@ PASSAGE_NP_PATH = "/home/jianx/results/passage_0__emb_p__data_obj_0.pb"
 PASSAGE_MAP_PATH = "/datadrive/jianx/data/annoy/100_ance_passage_map.dict"
 QUERY_TRAIN_NP_PATH = "/home/jianx/results/query_0__emb_p__data_obj_0.pb"
 QUERY_MAP_PATH = "/datadrive/jianx/data/annoy/100_ance_query_train_map.dict"
-TRAIN_RANK_PATH = "/datadrive/jianx/data/train_data/ance_training_rank100_8841823.csv"
-#TRAIN_RANK_PATH = "/datadrive/ruohan/reverse_ranker/loss_0.09/new_training_data_train.csv"
+# TRAIN_RANK_PATH = "/datadrive/jianx/data/train_data/ance_training_rank100_8841823.csv"
+TRAIN_RANK_PATH = "/datadrive/ruohan/reverse_ranker/new_training/combine_rank_train_phase2.csv"
 
 
 OUT_RANK = 200
@@ -132,7 +132,7 @@ TOP_K = 100
 
 # With probability alpha
 # Select a random negative sample from train_neg_dict
-ALPHA = 0.4
+ALPHA = 0.5
 
 def dot_product(A, B, normalize=False):
     if normalize:
@@ -252,7 +252,7 @@ import os
 
 
 MODEL_PATH = "/datadrive/ruohan/results/"
-CURRENT_DEVICE = "cuda:0"
+CURRENT_DEVICE = "cuda:1"
 
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
@@ -261,7 +261,7 @@ if not os.path.exists(MODEL_PATH):
 def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_size, pretrained=False):
     if pretrained:
         net = CorpusNet(embed_size=embed_size)
-        net.load_state_dict(torch.load("/home/ruohan/DSSM/search-exposure/reverse_ranker/results/reverse_fine_tune1000_100_1000_0.0001_32.model"))
+        net.load_state_dict(torch.load("/datadrive/ruohan/reverse_ranker/new_training/final_model_after_first_training.model"))
         net.to(CURRENT_DEVICE)
     else:
         net = CorpusNet(embed_size=embed_size).to(CURRENT_DEVICE)
@@ -273,7 +273,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 #     print("Num of passages: " + str(len(passage_dict)))
 #     print("Finish loading.")
 
-    arg_str = "reverse_alpha0.4" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
+    arg_str = "reverse_phase2.2_alpha0.5" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
         embed_size)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
@@ -292,5 +292,5 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 
 
 # Train on new training set
-main(1000,100,1000,0.0001,MODEL_PATH,32)
+main(1000,100,1000,0.0005,MODEL_PATH,32)
 
