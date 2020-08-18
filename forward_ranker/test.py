@@ -2,7 +2,7 @@ import torch
 import random
 import math
 import numpy as np
-from train import generate_sparse
+from forward_ranker.train import generate_sparse
 
 
 def test_loader(net, device, test_batch, top_dict, query_test_dict, passage_dict, rating_dict):
