@@ -11,7 +11,7 @@
 
 # ## Import data: load_data.py
 
-# In[177]:
+# In[1]:
 
 
 import csv
@@ -27,7 +27,7 @@ TRAIN_RANK_PATH = "/datadrive/jianx/data/train_data/ance_training_rank100_200000
 
 
 OUT_RANK = 200
-# N_PASSAGE = 200000
+N_PASSAGE = 200000
 def obj_reader(path):
     with open(path, 'rb') as handle:
         return pickle.load(handle, encoding="bytes")
@@ -70,7 +70,6 @@ def load():
     return train_pos_dict, train_neg_dict, query_dict, passage_dict
 
 
-
 # In[2]:
 
 
@@ -79,37 +78,40 @@ train_pos_dict, train_neg_dict, query_dict, passage_dict = load()
 
 # ## Network Architecture: network.py
 
-# In[63]:
+# In[10]:
 
 
 import torch
 import torch.nn as nn
 
-NUM_HIDDEN_NODES = 64
-NUM_HIDDEN_LAYERS = 6
+NUM_HIDDEN_NODES = 1536
+NUM_HIDDEN_LAYERS = 15
 DROPOUT_RATE = 0.1
-FEAT_COUNT = 768
-
-
+    
 # Define the network
-class CorpusNet(torch.nn.Module):
+class ResidualNet(torch.nn.Module):
 
     def __init__(self, embed_size):
-        super(CorpusNet, self).__init__()
-
-        layers = []
-        last_dim = FEAT_COUNT
-        for i in range(NUM_HIDDEN_LAYERS):
-            layers.append(nn.Linear(last_dim, NUM_HIDDEN_NODES))
-            layers.append(nn.ReLU())
-            layers.append(nn.LayerNorm(NUM_HIDDEN_NODES))
-            layers.append(nn.Dropout(p=DROPOUT_RATE))
-            last_dim = NUM_HIDDEN_NODES
-        layers.append(nn.Linear(last_dim, embed_size))
-        self.model = nn.Sequential(*layers)
+        super(ResidualNet, self).__init__()
+        
+        self.input = nn.Linear(embed_size, NUM_HIDDEN_NODES)
+        self.relu = nn.ReLU()
+        self.normlayer = nn.LayerNorm(NUM_HIDDEN_NODES)
+        self.dropout = nn.Dropout(p=DROPOUT_RATE)
+        self.output = nn.Linear(NUM_HIDDEN_NODES, embed_size)
 
     def forward(self, x):
-        return self.model(x)
+        identity = x
+        out = x
+        for i in range(NUM_HIDDEN_LAYERS):
+            out = self.input(out)
+            out = self.relu(out)
+            out = self.normlayer(out)
+            out = self.dropout(out)
+            out = self.output(out)
+            out += identity
+            out = self.relu(out)
+        return out
 
     def parameter_count(self):
         return sum(p.numel() for p in self.parameters() if p.requires_grad)
@@ -117,7 +119,7 @@ class CorpusNet(torch.nn.Module):
 
 # ## Train reverse ranker: train.py
 
-# In[152]:
+# In[15]:
 
 
 import torch
@@ -218,16 +220,12 @@ def train(net, epoch_size, batch_size, optimizer, device, train_pos_dict, train_
         passages, pos, neg, labels = mini_batch(batch_size, device, train_pos_dict, train_neg_dict, 
                                                 query_dict, passage_dict)
         optimizer.zero_grad()
-        p_embed = torch.cat((net(passages), passages), 1).to(device)
-        pos_embed = torch.cat((net(pos), pos), 1).to(device)
-        neg_embed = torch.cat((net(neg), neg), 1).to(device)
+        p_embed = net(passages).to(device)
+        pos_embed = net(pos).to(device)
+        neg_embed = net(neg).to(device)
         out_pos = dot_product(p_embed, pos_embed).to(device)
         out_neg = dot_product(p_embed, neg_embed).to(device)
         out = torch.cat((out_pos, out_neg), -1).squeeze()
-#         out = torch.cat((out_pos, out_neg), -1) * torch.tensor([scale], dtype=torch.float).to(device)
-#         print(softmax(out))
-#         print(labels)
-#         loss = criterion(softmax(out).squeeze(), softmax(labels))
         if loss_option == "bce":
             loss = bce(softmax(out), softmax(labels))
         if loss_option == "ce":
@@ -241,7 +239,8 @@ def train(net, epoch_size, batch_size, optimizer, device, train_pos_dict, train_
 
 # ## Main function: main.py
 
-# In[181]:
+# In[16]:
+
 
 import datetime
 from datetime import datetime, timezone, timedelta
@@ -252,6 +251,10 @@ TIME_OFFSET = -4
 def print_message(s, offset=TIME_OFFSET):
     print("[{}] {}".format(datetime.now(timezone(timedelta(hours=offset))).strftime("%b %d, %H:%M:%S"), s), flush=True)
 
+
+# In[17]:
+
+
 import torch
 from torch import optim
 import csv
@@ -260,7 +263,7 @@ import os
 
 
 MODEL_PATH = "/datadrive/ruohan/random_sample/"
-CURRENT_DEVICE = "cuda:1"
+CURRENT_DEVICE = "cuda:0"
 
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
@@ -268,11 +271,11 @@ if not os.path.exists(MODEL_PATH):
 
 def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_size, pretrained=False):
     if pretrained:
-        net = CorpusNet(embed_size=embed_size)
-        net.load_state_dict(torch.load("/datadrive/ruohan/reverse_ranker/new_training/final_model_after_first_training.model"))
+        net = ResidualNet(embed_size=embed_size)
+        net.load_state_dict(torch.load("/home/ruohan/DSSM/search-exposure/reverse_ranker/results/reverse_fine_tune1000_100_1000_0.0001_32.model"))
         net.to(CURRENT_DEVICE)
     else:
-        net = CorpusNet(embed_size=embed_size).to(CURRENT_DEVICE)
+        net = ResidualNet(embed_size=embed_size).to(CURRENT_DEVICE)
     print("Loading data")
 #     train_rank_dict, query_dict, passage_dict = load()
 #     print("Data successfully loaded.")
@@ -281,7 +284,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 #     print("Num of passages: " + str(len(passage_dict)))
 #     print("Finish loading.")
 
-    arg_str = "reverse_alpha0.5_initial_optim_layer6" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
+    arg_str = "reverse_alpha0.5_initial_residual_saveoptim_layer15" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
         embed_size)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
@@ -298,13 +301,19 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
                 "optimizer": optimizer.state_dict(),
                 "n_epoch": ep_idx,
                 "train_loss": train_loss,
-                "n_hidden_layer": NUM_HIDDEN_LAYERS
+                "n_hidden_layers": NUM_HIDDEN_LAYERS
                     }, unique_path)
 
 
 # In[ ]:
 
 
-# Train on new training set
-main(1000,100,1000,0.0001,MODEL_PATH,32)
+# Train on randomly sampled training data that contains 200,000 passages
+main(1000,100,1000,0.0001,MODEL_PATH,768)
+
+
+# In[ ]:
+
+
+
 
