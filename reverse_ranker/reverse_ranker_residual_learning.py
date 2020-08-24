@@ -85,7 +85,7 @@ import torch
 import torch.nn as nn
 
 NUM_HIDDEN_NODES = 1536
-NUM_HIDDEN_LAYERS = 15
+NUM_HIDDEN_LAYERS = 3
 DROPOUT_RATE = 0.1
     
 # Define the network
@@ -263,7 +263,7 @@ import os
 
 
 MODEL_PATH = "/datadrive/ruohan/random_sample/"
-CURRENT_DEVICE = "cuda:0"
+CURRENT_DEVICE = "cuda:1"
 
 if not os.path.exists(MODEL_PATH):
     os.makedirs(MODEL_PATH)
@@ -284,7 +284,7 @@ def main(num_epochs, epoch_size, batch_size, learning_rate, model_path, embed_si
 #     print("Num of passages: " + str(len(passage_dict)))
 #     print("Finish loading.")
 
-    arg_str = "reverse_alpha0.5_initial_residual_saveoptim_layer15" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
+    arg_str = "reverse_alpha0.5_initial_residual_saveoptim_layer3" + str(num_epochs) + "_" + str(epoch_size) + "_" + str(batch_size) + "_" + str(learning_rate) + "_" + str(
         embed_size)
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
