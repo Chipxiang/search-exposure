@@ -9,10 +9,13 @@ from forward_ranker.utils import print_message
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 
-BATCH_SIZE = 10000
+QUERY_TRAIN_SIZE = 250_000
+BATCH_SIZE = 20000
 SAMPLE_SIZE = 8841823
 RANK = 100
-TRAINING_DATA_PATH = "/datadrive/jianx/data/train_data/ance_training_rank{}_{}.csv".format(RANK, SAMPLE_SIZE)
+TRAINING_DATA_PATH = "/datadrive/jianx/data/train_data/ance_training_rank{}_nqueries{}_{}.csv".format(RANK,
+                                                                                                      QUERY_TRAIN_SIZE,
+                                                                                                      SAMPLE_SIZE)
 
 print_message("Loading embeddings.")
 passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
@@ -37,7 +40,7 @@ print_message("Building index")
 faiss.omp_set_num_threads(16)
 dim = passage_embeddings.shape[1]
 query_index = faiss.IndexFlatIP(dim)
-query_index.add(query_train_embeddings)
+query_index.add(query_train_embeddings[:QUERY_TRAIN_SIZE])
 
 with open(TRAINING_DATA_PATH, "w+") as f:
     f.write("")
