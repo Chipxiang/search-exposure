@@ -27,11 +27,6 @@ TEST_DATA_PATH = "/datadrive/jianx/data/train_data/ance_testing_rank{}_nqueries{
     N_QUERIES,
     TEST_SIZE,
     timestamp())
-all_lcs_set = set(random.sample(range(8841823), TRAIN_SIZE + TEST_SIZE))
-test_lcs_set = set(random.sample(all_lcs_set, TEST_SIZE))
-train_lcs_set = all_lcs_set - test_lcs_set
-train_lcs = np.array(list(train_lcs_set))
-test_lcs = np.array(list(test_lcs_set))
 
 print_message("Loading embeddings.")
 passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
@@ -59,6 +54,17 @@ query_index = faiss.IndexFlatIP(dim)
 query_index.add(query_train_embeddings[:N_QUERIES])
 full_query_index = faiss.IndexFlatIP(dim)
 full_query_index.add(query_train_embeddings)
+
+train_lcs_set = set()
+for qidx in range(N_QUERIES):
+    qid = query_train_mapping[qidx]
+    for pid in all_results[qid].keys():
+        train_lcs_set.add(pid_offset[pid])
+
+train_lcs_set = set(random.sample(train_lcs_set, TRAIN_SIZE))
+train_lcs = np.array(list(train_lcs_set))
+remaining_lcs_set = set(range(8841823)) - train_lcs_set
+test_lcs = np.array(list(random.sample(remaining_lcs_set, TEST_SIZE)))
 
 train_passage_embeddings = passage_embeddings[train_lcs]
 test_passage_embeddings = passage_embeddings[test_lcs]
