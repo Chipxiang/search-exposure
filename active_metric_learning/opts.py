@@ -77,6 +77,7 @@ def get_opts_active_learning():
                         help='device')
     parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/final_models/no_active_residual_50000_query_200000_passage.model',
                         help='Reverse ranker path')
-
+    opts = parser.parse_args()
+    return opts
 
 

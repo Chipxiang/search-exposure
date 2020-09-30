@@ -39,8 +39,8 @@ if active_learning_option == "No":
     query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
     
 else:
-    reverse_ranker_path, network_type = opts.reverse_ranker_path
-    reverse_ranker = load_model(reverse_ranker_path)
+    reverse_ranker_path = opts.reverse_ranker_path
+    reverse_ranker, network_type = load_model(reverse_ranker_path, device)
     passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
     query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
     passage_embeddings = transform_np_transformation(passage_embeddings, reverse_ranker, device)

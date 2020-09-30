@@ -64,7 +64,7 @@ def load_train(path):
     return my_dict
 
 # Load model
-def load_model(path):
+def load_model(path, current_device):
     checkpoint = torch.load(path)
     network_type = checkpoint['network_type']
     embed_size = checkpoint['embed_size']
