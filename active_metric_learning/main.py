@@ -92,7 +92,9 @@ def main():
                 "embed_size": embed_size,
                 "num_hidden_nodes": num_hidden_nodes,
                 "n_hidden_layer": num_hidden_layers,
-                "dropout_rate": dropout_rate
+                "dropout_rate": dropout_rate,
+                "num_passage": num_passage,
+                "num_query": num_query
                     }, unique_path)
 
 if __name__ == '__main__':

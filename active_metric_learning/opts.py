@@ -8,7 +8,7 @@ def get_opts():
                         help='data folder')
     parser.add_argument('--pretrain_model_path', type=str, default='/datadrive/ruohan/rerank/train_query_50000_morepos/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
                         help='pretrained model path')    
-    parser.add_argument('--out_dir', type=str, default='/datadrive/ruohan/final_results/',
+    parser.add_argument('--out_dir', type=str, default='/datadrive/ruohan/final_models/',
                         help='output folder')
     parser.add_argument('--device', type=str, default='cuda:2',
                         help='device')    
@@ -47,6 +47,14 @@ def get_opts():
                         help='Number of hidden layers')   
     parser.add_argument('--dropout_rate', type=float, default=0.1,
                         help='Dropout rate')     
+
+    # evaluation
+    parser.add_argument('--test_data_path', type=str, default='/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv',
+                        help='Test data folder')
+    parser.add_argument('--test_output_path', type=str, default='/datadrive/ruohan/final_evaluation/',
+                        help='Test output folder')    
+    parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/fix_residual_overfit/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
+                        help='Reverse ranker path')    
 
     ##
     opts = parser.parse_args()
