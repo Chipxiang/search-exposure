@@ -48,14 +48,19 @@ def get_opts():
     parser.add_argument('--dropout_rate', type=float, default=0.1,
                         help='Dropout rate')     
 
-    # evaluation
+    # testing
     parser.add_argument('--test_data_path', type=str, default='/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv',
                         help='Test data folder')
     parser.add_argument('--test_output_path', type=str, default='/datadrive/ruohan/final_evaluation/',
                         help='Test output folder')    
     parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/fix_residual_overfit/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
-                        help='Reverse ranker path')    
+                        help='Reverse ranker path')  
+
+    # evaluation
+    parser.add_argument('--eval_data_path', type=str, default='/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv',
+                        help='Evaluation results path') 
 
     ##
     opts = parser.parse_args()
     return opts
+
