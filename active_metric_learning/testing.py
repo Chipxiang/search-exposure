@@ -149,19 +149,19 @@ def compare_specific_passage(pred_rank_test1, forward_baseline_rank_test1, n):
         if diff != set():
             count += 1
             all_count += len(diff)
-#             print("Newly found {}".format(diff))
         diff_loss = baseline - pred
         if diff_loss != set():
             count_loss += 1
             all_count_loss += len(diff_loss)
-#             print("Lose {}".format(diff_loss))
     print("Percentage of passages with newly found exposing queries: {}".format(count/n))
     print("Percentage of passages that lose originaly found exposing queries: {}".format(count_loss/n))
     print("Number of newly found exposing queries:{} Number of lost exposing queries:{} Net gain:{}".format(all_count, all_count_loss, all_count - all_count_loss))
 
+# Compute NRBP
+
+
 # Main function
-def testing():
-    opts = get_opts()
+def testing(opts):
     reverse_ranker_path = opts.reverse_ranker_path
     test_data_path = opts.test_data_path
     test_output_path = opts.test_output_path
@@ -221,8 +221,10 @@ def testing():
     output_path = active_learning + "_" + network_type + "_" + str(num_query) + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage" + ".dict"
     obj_writer(results_dict, test_output_path + output_path)
 
-if __name__ == '__main__':
-    testing()
+    args_dict = {"active_learning": active_learning, "network_type":network_type,
+                "num_query": num_query, "num_passage": num_passage}
+
+    return true_dict_100, forward_baseline_rank, pred_rank_test, args_dict
 
 
 
