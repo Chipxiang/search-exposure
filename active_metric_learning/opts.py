@@ -49,7 +49,7 @@ def get_opts():
                         help='Dropout rate')     
 
     # testing
-    parser.add_argument('--test_data_path', type=str, default='/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv',
+    parser.add_argument('--test_data_path', type=str, default='/datadrive/ruohan/final_train_test_data/ance_testing_rank100_nqueries50000_npassages20000.csv',
                         help='Test data folder')
     parser.add_argument('--test_output_path', type=str, default='/datadrive/ruohan/final_evaluation/',
                         help='Test output folder')    

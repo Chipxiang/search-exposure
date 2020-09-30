@@ -10,6 +10,7 @@ from forward_ranker.test import get_ndcg_precision_rr
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 import pickle
+import csv
 import numpy as np
 import pandas as pd
 import random
@@ -23,6 +24,7 @@ OUTPUT_PATH = "/datadrive/ruohan/final_deliverable/all_results.csv"
 def transform_ground_truth(true_dict, p):
     transform_true_dict = {}
     for pid, qid_rank in true_dict.items():
+        transform_true_dict[pid] = {}
         for qid, rank in qid_rank.items():
             transform_true_dict[pid][qid] = p ** rank
     return transform_true_dict
@@ -57,7 +59,7 @@ def get_reverse_nrbp_rr(true_dict, test_dict, rank, p):
          nrbp = cumulative_gain / ideal_gain
     return nrbp, rr
 
-def calculate_metrics(rating_dict, result_dict, rank=10, p=P_REVERSE):
+def calculate_metrics(rating_dict, result_dict, rank, p):
     pids = list(result_dict.keys())
     result_nrbp = []
     result_rr = []
@@ -71,10 +73,11 @@ def calculate_metrics(rating_dict, result_dict, rank=10, p=P_REVERSE):
     print("NRBP@{}: {:.4f}".format(rank,avg_nrbp), "RR: {:.4f}".format(avg_rr))
     return avg_nrbp
 
-def grid_nrbp(p_forwards = np.arange(0.1, 1.1, 0.1), p_reverses = np.arange(0.1, 1.1, 0.1)):
+def grid_nrbp(p_forwards = [0.5,1], p_reverses = [0.5,1], ranks = [10,100]):
     x = []
     y = []
     data = []
+    baseline_data = []
     opts = get_opts()
     ## Need to specify following arguments
     # reverse_ranker_path
@@ -86,18 +89,21 @@ def grid_nrbp(p_forwards = np.arange(0.1, 1.1, 0.1), p_reverses = np.arange(0.1,
     network_type = args_dict["network_type"]
     num_query = args_dict["num_query"]
     num_passage = args_dict["num_passage"]
-    for p_forward in p_forwards:
-        rating_dict = transform_true_dict(true_dict, p_forward)
-        for p_reverse in p_reverses:
-            x.append(p_forward)
-            y.append(p_reverse)
-            baseline_nrbp = calculate_metrics(rating_dict, baseline_dict, 10, p_reverse)
-            model_nrbp = calculate_metrics(rating_dict, result_dict, 10, p_reverse)
-            data.append((model_nrbp-baseline_nrbp)/baseline_nrbp)
-            print_message("Processed p_forward={}, p_reverse={}".format(p_forward, p_reverse))
+    for r in ranks:
+        for p_forward in p_forwards:
+            rating_dict = transform_ground_truth(true_dict, p_forward)
+            for p_reverse in p_reverses:
+                x.append(p_forward)
+                y.append(p_reverse)
+                baseline_nrbp = calculate_metrics(rating_dict, baseline_dict, r, p_reverse)
+                model_nrbp = calculate_metrics(rating_dict, result_dict, r, p_reverse)
+                # data.append((model_nrbp-baseline_nrbp)/baseline_nrbp)
+                data.append(model_nrbp)
+                baseline_data.append(baseline_nrbp)
+                print_message("Processed p_forward={}, p_reverse={}".format(p_forward, p_reverse))
 
     # Write results to csv
-    output_results = [active_learning, network_type, num_query, num_passage] + data
+    output_results = [active_learning, network_type, num_query, num_passage] + data + baseline_data
     with open(OUTPUT_PATH, mode='a+') as output:
         output_writer = csv.writer(output)
         output_writer.writerow(output_results)

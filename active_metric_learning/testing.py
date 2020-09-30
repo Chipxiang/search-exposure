@@ -224,7 +224,7 @@ def testing(opts):
     args_dict = {"active_learning": active_learning, "network_type":network_type,
                 "num_query": num_query, "num_passage": num_passage}
 
-    return true_dict_100, forward_baseline_rank, pred_rank_test, args_dict
+    return true_dict_100, forward_baseline_rank_test, pred_rank_test, args_dict
 
 
 
