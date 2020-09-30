@@ -132,6 +132,10 @@ def compare_with_baseline(query_index, true_dict_100, forward_baseline_rank, pas
     print("Baseline model: {}".format(np.mean(top_pred_baseline)/np.mean(top_true_baseline)))
     return top_true, top_pred, top_true_baseline, top_pred_baseline, pred_rank
 
+def delete_zeros(myDict):
+    out_dict = {key:val for key, val in myDict.items() if val != 0}
+    return set(list(out_dict.keys()))
+
 def compare_specific_passage(pred_rank_test1, forward_baseline_rank_test1, n):
     count = 0
     count_loss = 0
