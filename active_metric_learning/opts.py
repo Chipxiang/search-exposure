@@ -18,7 +18,7 @@ def get_opts():
                         help='Number of training queries')
     parser.add_argument('--num_passage', type=int, default=200000,
                         help='Number of training passages')
-    parser.add_argument('--active_learning_stage', type=str, default="_no_active_",
+    parser.add_argument('--active_learning_stage', type=str, default="no_active",
                         help='active learning option')       
 
     ## Network settings

@@ -20,6 +20,7 @@ def main():
     pretrained_path = opts.pretrain_model_path
     model_path = opts.out_dir
     # training settings
+    pretrained = opts.pretrained_option
     num_epochs = opts.num_epochs
     learning_rate = opts.learning_rate
     num_query = opts.num_query
@@ -34,6 +35,8 @@ def main():
 
     if not os.path.exists(model_path):
         os.makedirs(model_path)
+    torch.manual_seed(318)
+
     if pretrained:
         checkpoint = torch.load(pretrained_path)
         network_type = checkpoint['network_type']
@@ -68,10 +71,11 @@ def main():
     print("Num of passages: " + str(len(passage_dict)))
     print("Finish loading.")
 
-    arg_str = active_learning + network_type + str(num_query) + "query" + str(num_passage) + "passage"
+    arg_str = active_learning + "_" + network_type + "_" + str(num_query) + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage"
     unique_path = model_path + arg_str + ".model"
     output_path = model_path + arg_str + ".csv"
-    
+    print("Total number of parameters: {}".format(net.parameter_count()))
+
     for ep_idx in range(num_epochs):
         train_loss = train(net, optimizer, opts, train_pos_dict, 
                            train_neg_dict, query_dict, passage_dict)
