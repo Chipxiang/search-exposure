@@ -8,7 +8,7 @@ def get_opts():
                         help='data folder')
     parser.add_argument('--pretrain_model_path', type=str, default='/datadrive/ruohan/rerank/train_query_50000_morepos/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
                         help='pretrained model path')    
-    parser.add_argument('--out_dir', type=str, default='/datadrive/ruohan/rerank/final_results/',
+    parser.add_argument('--out_dir', type=str, default='/datadrive/ruohan/final_results/',
                         help='output folder')
     parser.add_argument('--device', type=str, default='cuda:2',
                         help='device')    
@@ -40,13 +40,13 @@ def get_opts():
                         help='Learning rate') 
     # default for append
     parser.add_argument('--embed_size', type=int, default=32,
-                        help='Epoch size')
+                        help='Embedding size')
     parser.add_argument('--num_hidden_nodes', type=int, default=64,
-                        help='Epoch size')  
+                        help='Number of hidden nodes')  
     parser.add_argument('--num_hidden_layers', type=int, default=3,
-                        help='Epoch size')   
+                        help='Number of hidden layers')   
     parser.add_argument('--dropout_rate', type=float, default=0.1,
-                        help='Epoch size')     
+                        help='Dropout rate')     
 
     ##
     opts = parser.parse_args()
