@@ -4,7 +4,7 @@ def get_opts():
     parser = argparse.ArgumentParser(description='Active Metric Learning for Exposure Set Retrieval')
 
     ## Paths and device
-    parser.add_argument('--data_dir', type=str, default='/datadrive/jianx/data/train_data/ance_rerank_training_rank100_nqueries50000_200000_Sep_11_03:48:27.csv',
+    parser.add_argument('--data_dir', type=str, default='/datadrive/jianx/data/train_data/ance_training_rank100_nqueries50000_200000_Sep_03_22:56:31.csv',
                         help='data folder')
     parser.add_argument('--pretrain_model_path', type=str, default='/datadrive/ruohan/rerank/train_query_50000_morepos/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
                         help='pretrained model path')    

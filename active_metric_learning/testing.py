@@ -132,6 +132,29 @@ def compare_with_baseline(query_index, true_dict_100, forward_baseline_rank, pas
     print("Baseline model: {}".format(np.mean(top_pred_baseline)/np.mean(top_true_baseline)))
     return top_true, top_pred, top_true_baseline, top_pred_baseline, pred_rank
 
+def compare_specific_passage(pred_rank_test1, forward_baseline_rank_test1, n):
+        count = 0
+            count_loss = 0
+                all_count = 0
+                    all_count_loss = 0
+                        for i in range(n):
+                                    pid = list(pred_rank_test1.keys())[i]
+                                            pred = delete_zeros(pred_rank_test1[pid])
+                                                    baseline = delete_zeros(forward_baseline_rank_test1[pid])
+                                                            diff = pred - baseline
+                                                                    if diff != set():
+                                                                                    count += 1
+                                                                                                all_count += len(diff)
+                                                                                                #             print("Newly found {}".format(diff))
+                                                                                                        diff_loss = baseline - pred
+                                                                                                                if diff_loss != set():
+                                                                                                                                count_loss += 1
+                                                                                                                                            all_count_loss += len(diff_loss)
+                                                                                                                                            #             print("Lose {}".format(diff_loss))
+                                                                                                                                                print("Percentage of passages with newly found exposing queries: {}".format(count/n))
+                                                                                                                                                    print("Percentage of passages that lose originaly found exposing queries: {}".format(count_loss/n))
+                                                                                                                                                        print("Number of newly found exposing queries:{} Number of lost exposing queries:{} Net gain:{}".format(all_count, all_count_loss, all_count - all_count_loss))
+
 # Main function
 def testing():
     opts = get_opts()
@@ -160,7 +183,7 @@ def testing():
     network_type = checkpoint['network_type']
     embed_size = checkpoint['embed_size']
     num_hidden_nodes = checkpoint['num_hidden_nodes']
-    num_hidden_layers = checkpoint['num_hidden_nodes']
+    num_hidden_layers = checkpoint['num_hidden_layers']
     dropout_rate = checkpoint['dropout_rate']
     num_query = checkpoint['num_query']
     num_passage = checkpoint['num_passage']
@@ -172,6 +195,7 @@ def testing():
                         num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
     net.load_state_dict(checkpoint['model'])
     net.to(current_device)
+    net.eval()
 
     # Data preparation
     query_new_np = transform_np_transformation(query_np, net, current_device)
@@ -190,9 +214,11 @@ def testing():
     results_dict = {}
     results_dict['forward_baseline_rank_test'] = forward_baseline_rank_test
     results_dict['pred_rank_test'] = pred_rank_test
-    output_path = active_learning + "_" + network_type + "_" + str(num_query)
-                    + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage" + ".dict"
+    output_path = active_learning + "_" + network_type + "_" + str(num_query) + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage" + ".dict"
     obj_writer(results_dict, test_output_path + output_path)
+
+if __name__ == '__main__':
+    testing()
 
 
 

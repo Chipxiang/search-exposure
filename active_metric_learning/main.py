@@ -42,7 +42,7 @@ def main():
         network_type = checkpoint['network_type']
         embed_size = checkpoint['embed_size']
         num_hidden_nodes = checkpoint['num_hidden_nodes']
-        num_hidden_layers = checkpoint['num_hidden_nodes']
+        num_hidden_layers = checkpoint['num_hidden_layers']
         dropout_rate = checkpoint['dropout_rate']
         if network_type == "append":
             net = AppendNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
@@ -91,7 +91,7 @@ def main():
                 "network_type": network_type,
                 "embed_size": embed_size,
                 "num_hidden_nodes": num_hidden_nodes,
-                "n_hidden_layer": num_hidden_layers,
+                "num_hidden_layers": num_hidden_layers,
                 "dropout_rate": dropout_rate,
                 "num_passage": num_passage,
                 "num_query": num_query
