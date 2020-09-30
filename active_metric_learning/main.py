@@ -37,7 +37,7 @@ def main():
         os.makedirs(model_path)
     torch.manual_seed(318)
 
-    if pretrained:
+    if pretrained == "Yes":
         checkpoint = torch.load(pretrained_path)
         network_type = checkpoint['network_type']
         embed_size = checkpoint['embed_size']

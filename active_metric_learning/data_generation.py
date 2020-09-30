@@ -13,7 +13,7 @@ from testing import load_model, transform_np_transformation
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 
-N_QUERIES = 500_000
+N_QUERIES = 50_000
 TRAIN_SIZE = 200_000
 TEST_SIZE = 20_000
 BATCH_SIZE = 20_000
@@ -24,7 +24,7 @@ active_learning_option = opts.active_learning_option
 active_learning_stage = opts.active_learning_stage
 device = opts.device
 
-if not active_learning_option:
+if active_learning_option == "No":
     TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}.csv".format(
         RANK,
         N_QUERIES,

@@ -25,7 +25,7 @@ def get_opts():
     ## Network settings
     parser.add_argument('--network_type', type=str, default='append',
                         help='Network type') 
-    parser.add_argument('--pretrained_option', type=bool, default=False,
+    parser.add_argument('--pretrained_option', type=str, default="No",
                         help='Pretrained or not')                            
     parser.add_argument('--num_epochs', type=int, default=1000,
                         help='Number of epochs')
@@ -69,7 +69,7 @@ def get_opts():
 def get_opts_active_learning():
     parser = argparse.ArgumentParser(description='Active Metric Learning for Exposure Set Retrieval')  
 
-    parser.add_argument('--active_learning_option', type=bool, default=False,
+    parser.add_argument('--active_learning_option', type=str, default="No",
                         help='Active Learning or not')
     parser.add_argument('--active_learning_stage', type=str, default='no_active',
                         help='Active learning stage')
