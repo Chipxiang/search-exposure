@@ -1,5 +1,6 @@
 import argparse
 
+# Genearte arguments for train, test
 def get_opts():
     parser = argparse.ArgumentParser(description='Active Metric Learning for Exposure Set Retrieval')
 
@@ -63,4 +64,19 @@ def get_opts():
     ##
     opts = parser.parse_args()
     return opts
+
+# Specific arguments for active learning
+def get_opts_active_learning():
+    parser = argparse.ArgumentParser(description='Active Metric Learning for Exposure Set Retrieval')  
+
+    parser.add_argument('--active_learning_option', type=bool, default=False,
+                        help='Active Learning or not')
+    parser.add_argument('--active_learning_stage', type=str, default='no_active',
+                        help='Active learning stage')
+    parser.add_argument('--device', type=str, default='cuda:0',
+                        help='device')
+    parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/final_models/no_active_residual_50000_query_200000_passage.model',
+                        help='Reverse ranker path')
+
+
 

@@ -63,6 +63,27 @@ def load_train(path):
             my_dict[pid][qid] = rank
     return my_dict
 
+# Load model
+def load_model(path):
+    checkpoint = torch.load(path)
+    network_type = checkpoint['network_type']
+    embed_size = checkpoint['embed_size']
+    num_hidden_nodes = checkpoint['num_hidden_nodes']
+    num_hidden_layers = checkpoint['num_hidden_layers']
+    dropout_rate = checkpoint['dropout_rate']
+    num_query = checkpoint['num_query']
+    num_passage = checkpoint['num_passage']
+    if network_type == "append":
+        net = AppendNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
+                        num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
+    if network_type == "residual":
+        net = ResidualNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
+                        num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
+    net.load_state_dict(checkpoint['model'])
+    net.to(current_device)
+    net.eval()
+    return net, network_type    
+
 def transform_np_transformation(query_np, reverse_ranker, device, b=10000):
     n = int(query_np.shape[0]/b) + 1
 

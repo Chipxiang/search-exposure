@@ -7,6 +7,8 @@ import numpy as np
 import forward_ranker.load_data as load_data
 from forward_ranker.utils import print_message
 from forward_ranker.utils import timestamp
+from opts import get_opts_active_learning
+from testing import load_model, transform_np_transformation
 
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
@@ -17,19 +19,46 @@ TEST_SIZE = 20_000
 BATCH_SIZE = 20_000
 RANK = 100
 
-TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}.csv".format(
-    RANK,
-    N_QUERIES,
-    TRAIN_SIZE)
-TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}.csv".format(
-    RANK,
-    N_QUERIES,
-    TEST_SIZE)
+opts = get_opts_active_learning()
+active_learning_option = opts.active_learning_option
+active_learning_stage = opts.active_learning_stage
+device = opts.device
 
-print_message("Loading embeddings.")
-passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
+if not active_learning_option:
+    TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}.csv".format(
+        RANK,
+        N_QUERIES,
+        TRAIN_SIZE)
+    TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}.csv".format(
+        RANK,
+        N_QUERIES,
+        TEST_SIZE)
 
-query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
+    print_message("Loading embeddings.")
+    passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
+    query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
+    
+else:
+    reverse_ranker_path, network_type = opts.reverse_ranker_path
+    reverse_ranker = load_model(reverse_ranker_path)
+    passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
+    query_train_embeddings = obj_reader("/home/jianx/results/query_0__emb_p__data_obj_0.pb")
+    passage_embeddings = transform_np_transformation(passage_embeddings, reverse_ranker, device)
+    query_train_embeddings = transform_np_transformation(query_train_embeddings, reverse_ranker, device)
+
+    TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
+        RANK,
+        N_QUERIES,
+        TRAIN_SIZE,
+        network_type,
+        active_learning_stage)
+    TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
+        RANK,
+        N_QUERIES,
+        TEST_SIZE,
+        network_type,
+        active_learning_stage)
+
 query_train_mapping = obj_reader("/datadrive/jianx/data/annoy/100_ance_query_train_map.dict")
 pid_mapping = obj_reader("/datadrive/jianx/data/annoy/100_ance_passage_map.dict")
 pid_offset = obj_reader("/datadrive/data/preprocessed_data_with_test/pid2offset.pickle")
