@@ -133,27 +133,27 @@ def compare_with_baseline(query_index, true_dict_100, forward_baseline_rank, pas
     return top_true, top_pred, top_true_baseline, top_pred_baseline, pred_rank
 
 def compare_specific_passage(pred_rank_test1, forward_baseline_rank_test1, n):
-        count = 0
-            count_loss = 0
-                all_count = 0
-                    all_count_loss = 0
-                        for i in range(n):
-                                    pid = list(pred_rank_test1.keys())[i]
-                                            pred = delete_zeros(pred_rank_test1[pid])
-                                                    baseline = delete_zeros(forward_baseline_rank_test1[pid])
-                                                            diff = pred - baseline
-                                                                    if diff != set():
-                                                                                    count += 1
-                                                                                                all_count += len(diff)
-                                                                                                #             print("Newly found {}".format(diff))
-                                                                                                        diff_loss = baseline - pred
-                                                                                                                if diff_loss != set():
-                                                                                                                                count_loss += 1
-                                                                                                                                            all_count_loss += len(diff_loss)
-                                                                                                                                            #             print("Lose {}".format(diff_loss))
-                                                                                                                                                print("Percentage of passages with newly found exposing queries: {}".format(count/n))
-                                                                                                                                                    print("Percentage of passages that lose originaly found exposing queries: {}".format(count_loss/n))
-                                                                                                                                                        print("Number of newly found exposing queries:{} Number of lost exposing queries:{} Net gain:{}".format(all_count, all_count_loss, all_count - all_count_loss))
+    count = 0
+    count_loss = 0
+    all_count = 0
+    all_count_loss = 0
+    for i in range(n):
+        pid = list(pred_rank_test1.keys())[i]
+        pred = delete_zeros(pred_rank_test1[pid])
+        baseline = delete_zeros(forward_baseline_rank_test1[pid])
+        diff = pred - baseline
+        if diff != set():
+            count += 1
+            all_count += len(diff)
+#             print("Newly found {}".format(diff))
+        diff_loss = baseline - pred
+        if diff_loss != set():
+            count_loss += 1
+            all_count_loss += len(diff_loss)
+#             print("Lose {}".format(diff_loss))
+    print("Percentage of passages with newly found exposing queries: {}".format(count/n))
+    print("Percentage of passages that lose originaly found exposing queries: {}".format(count_loss/n))
+    print("Number of newly found exposing queries:{} Number of lost exposing queries:{} Net gain:{}".format(all_count, all_count_loss, all_count - all_count_loss))
 
 # Main function
 def testing():
