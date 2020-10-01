@@ -46,13 +46,13 @@ else:
     passage_embeddings = transform_np_transformation(passage_embeddings, reverse_ranker, device)
     query_train_embeddings = transform_np_transformation(query_train_embeddings, reverse_ranker, device)
 
-    TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
+    TRAINING_DATA_PATH = "/datadrive/ruohan/active_learning_train_test_data/ance_training_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
         RANK,
         N_QUERIES,
         TRAIN_SIZE,
         network_type,
         active_learning_stage)
-    TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
+    TEST_DATA_PATH = "/datadrive/ruohan/active_learning_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}_{}_{}.csv".format(
         RANK,
         N_QUERIES,
         TEST_SIZE,
