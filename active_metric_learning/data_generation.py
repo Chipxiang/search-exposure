@@ -13,7 +13,7 @@ from testing import load_model, transform_np_transformation
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 
-N_QUERIES = 50_000
+N_QUERIES = 450_000
 TRAIN_SIZE = 200_000
 TEST_SIZE = 20_000
 BATCH_SIZE = 20_000
