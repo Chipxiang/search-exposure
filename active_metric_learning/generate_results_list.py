@@ -20,8 +20,7 @@ from opts import get_opts
 from testing import testing
 import math
 
-OUTPUT_PATH = "/datadrive/ruohan/final_results_list/"
-
+OUTPUT_PATH = "/datadrive/ruohan/append_result_list/"
 def transform_ground_truth(true_dict, p):
     transform_true_dict = {}
     for pid, qid_rank in true_dict.items():
@@ -72,7 +71,7 @@ def calculate_metrics(rating_dict, result_dict, rank, p):
     print(len(result_nrbp))
     return result_nrbp
 
-def grid_nrbp(p_forwards = [0.5], p_reverses = [0.9], ranks = [100]):
+def grid_nrbp(ranks = [100]):
     data = []
     baseline_data = []
     opts = get_opts()
@@ -87,6 +86,8 @@ def grid_nrbp(p_forwards = [0.5], p_reverses = [0.9], ranks = [100]):
     num_query = args_dict["num_query"]
     num_passage = args_dict["num_passage"]
     results = {}
+    p_forwards = [opts.p_forward]
+    p_reverses = [opts.p_reverse]
     for r in ranks:
         for p_forward in p_forwards:
             rating_dict = transform_ground_truth(true_dict, p_forward)
@@ -95,7 +96,7 @@ def grid_nrbp(p_forwards = [0.5], p_reverses = [0.9], ranks = [100]):
                 model_nrbp = calculate_metrics(rating_dict, result_dict, r, p_reverse)
                 results["baseline_nrbp"] = baseline_nrbp
                 results["model_nrbp"] = model_nrbp
-    obj_writer(results, OUTPUT_PATH + network_type + ".dict")
+    obj_writer(results, OUTPUT_PATH + network_type +str(num_query)+"_" +str(num_passage)+"_"+str(opts.p_forward) + "_" + str(opts.p_reverse) + ".dict")
 
 if __name__ == '__main__':
     grid_nrbp()

@@ -52,6 +52,8 @@ def get_opts():
     # testing
     parser.add_argument('--test_data_path', type=str, default='/datadrive/ruohan/final_train_test_data/ance_testing_rank100_nqueries50000_npassages20000.csv',
                         help='Test data folder')
+    parser.add_argument('--p_forward', type=float, default=0.5, help='p forward')
+    parser.add_argument('--p_reverse', type=float, default=0.9, help='p reverse')
     parser.add_argument('--test_output_path', type=str, default='/datadrive/ruohan/final_evaluation/',
                         help='Test output folder')    
     parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/fix_residual_overfit/reverse_alpha0.5_layer1_residual1000_100_1000_0.0001_768.model',
