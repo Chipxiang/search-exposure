@@ -13,8 +13,8 @@ from testing import load_model, transform_np_transformation
 obj_reader = load_data.obj_reader
 obj_writer = load_data.obj_writer
 
-N_QUERIES = 450_000
-TRAIN_SIZE = 200_000
+#N_QUERIES = 450_000
+#TRAIN_SIZE = 200_000
 TEST_SIZE = 20_000
 BATCH_SIZE = 20_000
 RANK = 100
@@ -23,16 +23,24 @@ opts = get_opts_active_learning()
 active_learning_option = opts.active_learning_option
 active_learning_stage = opts.active_learning_stage
 device = opts.device
+data_option = opts.data_option
+N_QUERIES = opts.n_query
+TRAIN_SIZE = opts.n_passage
+
 
 if active_learning_option == "No":
-    TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}.csv".format(
+    TRAINING_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_training_rank{}_nqueries{}_npassages{}_{}.csv".format(
         RANK,
         N_QUERIES,
-        TRAIN_SIZE)
-    TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}.csv".format(
+        TRAIN_SIZE,
+        data_option)
+    TEST_DATA_PATH = "/datadrive/ruohan/final_train_test_data/ance_testing_rank{}_nqueries{}_npassages{}_{}.csv".format(
         RANK,
         N_QUERIES,
-        TEST_SIZE)
+        TEST_SIZE,
+        data_option)
+    print("Training data is stored at {}".format(TRAINING_DATA_PATH))
+    print("Test data is stored at {}".format(TEST_DATA_PATH))
 
     print_message("Loading embeddings.")
     passage_embeddings = obj_reader("/home/jianx/results/passage_0__emb_p__data_obj_0.pb")
@@ -65,7 +73,11 @@ pid_offset = obj_reader("/datadrive/data/preprocessed_data_with_test/pid2offset.
 
 print_message("Loading full search results")
 all_results = {}
-with open("/datadrive/jianx/data/results/all_search_rankings_100_100_flat.csv", "r") as f:
+if data_option == 'ance':
+    data_path = "/datadrive/jianx/data/results/all_search_rankings_100_100_flat.csv"
+elif data_option == 'bm25':
+    data_path = "/datadrive/ruohan/bm25/ground_truth/bm25_top100.csv"
+with open(data_path, "r") as f:
     for line in f:
         qid = int(line.split(",")[0])
         pid = int(line.split(",")[1])

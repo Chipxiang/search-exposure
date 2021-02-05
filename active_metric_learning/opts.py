@@ -61,7 +61,10 @@ def get_opts():
 
     # evaluation
     parser.add_argument('--eval_data_path', type=str, default='/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv',
-                        help='Evaluation results path') 
+                        help='Evaluation results path')
+
+    # bm25 options
+    parser.add_argument('--eval_mode', type=str, default='model')
 
     ##
     opts = parser.parse_args()
@@ -79,6 +82,9 @@ def get_opts_active_learning():
                         help='device')
     parser.add_argument('--reverse_ranker_path', type=str, default='/datadrive/ruohan/final_models/no_active_residual_50000_query_200000_passage.model',
                         help='Reverse ranker path')
+    parser.add_argument('--data_option', type=str, default='ance', help='ance or bm25')
+    parser.add_argument('--n_query', type=int, default=50000)
+    parser.add_argument('--n_passage', type=int, default=200000)
     opts = parser.parse_args()
     return opts
 

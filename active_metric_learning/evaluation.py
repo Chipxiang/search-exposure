@@ -73,7 +73,7 @@ def calculate_metrics(rating_dict, result_dict, rank, p):
     print("NRBP@{}: {:.4f}".format(rank,avg_nrbp), "RR: {:.4f}".format(avg_rr))
     return avg_nrbp
 
-def grid_nrbp(p_forwards = [0.5,0.9,1], p_reverses = [0.5,0.9,1], ranks = [10,100]):
+def grid_nrbp(p_forwards = [0.5,0.9,1], p_reverses = [0.5,0.9,1], ranks = [100]):
     x = []
     y = []
     data = []

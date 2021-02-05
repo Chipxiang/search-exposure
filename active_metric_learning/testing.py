@@ -13,7 +13,8 @@ PASSAGE_MAP_PATH = "/datadrive/jianx/data/annoy/100_ance_passage_map.dict"
 QUERY_TRAIN_NP_PATH = "/home/jianx/results/query_0__emb_p__data_obj_0.pb"
 QUERY_TEST_NP_PATH = "/home/jianx/results/test_query_0__emb_p__data_obj_0.pb"
 QUERY_MAP_PATH = "/datadrive/jianx/data/annoy/100_ance_query_train_map.dict"
-TRUE_PATH = "/datadrive/jianx/data/results/all_search_rankings_100_100_flat.csv"
+#TRUE_PATH = "/datadrive/jianx/data/results/all_search_rankings_100_100_flat.csv"
+TRUE_PATH = "/datadrive/ruohan/bm25/ground_truth/bm25_top100.csv"
 QUERY_DEV_NP_PATH = "/home/jianx/results/dev_query_0__emb_p__data_obj_0.pb"
 
 TRAIN_RANK_PATH = "/datadrive/jianx/data/train_data/ance_testing_rank100_nqueries50000_20000_Sep_03_22:56:31.csv"
@@ -188,62 +189,71 @@ def testing(opts):
     test_output_path = opts.test_output_path
     current_device = opts.device
     active_learning = opts.active_learning_stage
-
+    eval_mode = opts.eval_mode
+    network_type = "baseline only"
+    num_query = 50000
+    num_passage = 200000
     if not os.path.exists(test_output_path):
         os.makedirs(test_output_path)
 
     # Load data
-    print("Load passages.")
-    passage_np = obj_reader(PASSAGE_NP_PATH)
-    pid_mapping = obj_reader(PASSAGE_MAP_PATH)
-    print("Load queries.")
-    query_np = obj_reader(QUERY_TRAIN_NP_PATH)
-    qid_mapping = obj_reader(QUERY_MAP_PATH)
+    if eval_mode == "model":
+        print("Load passages.")
+        passage_np = obj_reader(PASSAGE_NP_PATH)
+        pid_mapping = obj_reader(PASSAGE_MAP_PATH)
+        print("Load queries.")
+        query_np = obj_reader(QUERY_TRAIN_NP_PATH)
+        qid_mapping = obj_reader(QUERY_MAP_PATH)
+        pid_reverse_mapping = {v: k for k, v in pid_mapping.items()}
     print("Load pre-processed results.")
     true_dict_100 = load_true_dict(k=100)
-    pid_reverse_mapping = {v: k for k, v in pid_mapping.items()}
-
+    
     # Load model
-    checkpoint = torch.load(reverse_ranker_path)
-    network_type = checkpoint['network_type']
-    embed_size = checkpoint['embed_size']
-    num_hidden_nodes = checkpoint['num_hidden_nodes']
-    num_hidden_layers = checkpoint['num_hidden_layers']
-    dropout_rate = checkpoint['dropout_rate']
-    num_query = checkpoint['num_query']
-    num_passage = checkpoint['num_passage']
-    if network_type == "append":
-        net = AppendNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
-                        num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
-    if network_type == "residual":
-        net = ResidualNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
-                        num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
-    net.load_state_dict(checkpoint['model'])
-    net.to(current_device)
-    net.eval()
+    if eval_mode == "model":
+        checkpoint = torch.load(reverse_ranker_path)
+        network_type = checkpoint['network_type']
+        embed_size = checkpoint['embed_size']
+        num_hidden_nodes = checkpoint['num_hidden_nodes']
+        num_hidden_layers = checkpoint['num_hidden_layers']
+        dropout_rate = checkpoint['dropout_rate']
+        num_query = checkpoint['num_query']
+        num_passage = checkpoint['num_passage']
+        if network_type == "append":
+            net = AppendNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
+                            num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
+        if network_type == "residual":
+            net = ResidualNet(embed_size=embed_size, num_hidden_nodes=num_hidden_nodes, 
+                            num_hidden_layers=num_hidden_layers, dropout_rate=dropout_rate)
+        net.load_state_dict(checkpoint['model'])
+        net.to(current_device)
+        net.eval()
 
-    # Data preparation
-    query_new_np = transform_np_transformation(query_np, net, current_device)
-    passage_new_np = transform_np_transformation(passage_np, net, current_device)
-    dim = query_new_np.shape[1]
-    query_index = faiss.IndexFlatIP(dim)
-    query_index.add(query_new_np)
+        # Data preparation
+        query_new_np = transform_np_transformation(query_np, net, current_device)
+        passage_new_np = transform_np_transformation(passage_np, net, current_device)
+        dim = query_new_np.shape[1]
+        query_index = faiss.IndexFlatIP(dim)
+        query_index.add(query_new_np)
 
     # Generate testing data
     forward_baseline_rank_test = load_train(test_data_path)
-    top_true_test, top_pred_test, top_true_baseline_test, top_pred_baseline_test, pred_rank_test = compare_with_baseline(query_index, 
-        true_dict_100, forward_baseline_rank_test, passage_new_np, qid_mapping, pid_reverse_mapping, n=20000)
-    compare_specific_passage(pred_rank_test, forward_baseline_rank_test, n=20000)
+    if eval_mode == "model":
+        top_true_test, top_pred_test, top_true_baseline_test, top_pred_baseline_test, pred_rank_test = compare_with_baseline(query_index, 
+            true_dict_100, forward_baseline_rank_test, passage_new_np, qid_mapping, pid_reverse_mapping, n=20000)
+        compare_specific_passage(pred_rank_test, forward_baseline_rank_test, n=20000)
 
     # Write results to dict
-    results_dict = {}
-    results_dict['forward_baseline_rank_test'] = forward_baseline_rank_test
-    results_dict['pred_rank_test'] = pred_rank_test
-    output_path = active_learning + "_" + network_type + "_" + str(num_query) + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage" + ".dict"
-    obj_writer(results_dict, test_output_path + output_path)
+    if eval_mode == "model":
+        results_dict = {}
+        results_dict['forward_baseline_rank_test'] = forward_baseline_rank_test
+        results_dict['pred_rank_test'] = pred_rank_test
+        output_path = active_learning + "_" + network_type + "_" + str(num_query) + "_"  + "query" + "_" + str(num_passage) + "_"  + "passage" + ".dict"
+        obj_writer(results_dict, test_output_path + output_path)
 
     args_dict = {"active_learning": active_learning, "network_type":network_type,
                 "num_query": num_query, "num_passage": num_passage}
+    if eval_mode != "model":
+        pred_rank_test = forward_baseline_rank_test
 
     return true_dict_100, forward_baseline_rank_test, pred_rank_test, args_dict
 
